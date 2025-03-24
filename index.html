@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucho the Dog</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="forest-scene">
+        <h1 class="title">Lucho the Dog</h1>
+        <div class="lights">
+            <div class="light"></div>
+            <div class="light"></div>
+            <div class="light"></div>
+            <div class="light"></div>
+            <div class="light"></div>
+        </div>
+        <div class="trees">
+            <div class="tree tree1"></div>
+            <div class="tree tree2"></div>
+            <div class="tree tree3"></div>
+            <div class="tree tree4"></div>
+            <div class="tree tree5"></div>
+        </div>
+        <div class="ground"></div>
+        <div class="dog">
+            <div class="dog-body">
+                <div class="leg front-left"></div>
+                <div class="leg front-right"></div>
+                <div class="leg back-left"></div>
+                <div class="leg back-right"></div>
+                <div class="dog-head">
+                    <div class="ear left"></div>
+                    <div class="ear right"></div>
+                    <div class="snout"></div>
+                    <div class="eyes"><span></span></div>
+                    <div class="closed-eyes"></div>
+                </div>
+            </div>
+            <div class="sleep-effects">
+                <div class="zzz">Z</div>
+                <div class="zzz">Z</div>
+                <div class="zzz">Z</div>
+                <div class="heart">♥</div>
+                <div class="heart">♥</div>
+                <div class="heart">♥</div>
+            </div>
+            <div class="enlightened-form">
+                <div class="aura"></div>
+                <div class="mushrooms">
+                    <div class="mushroom m1"></div>
+                    <div class="mushroom m2"></div>
+                    <div class="mushroom m3"></div>
+                </div>
+            </div>
+        </div>
+        <div class="treat-bag"></div>
+        <div class="treat">
+            <div class="treat-glow"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const treatBag = document.querySelector('.treat-bag');
+            const treat = document.querySelector('.treat');
+            const dog = document.querySelector('.dog');
+            let isDragging = false;
+            let currentX;
+            let currentY;
+            let initialX;
+            let initialY;
+            let xOffset = 0;
+            let yOffset = 0;
+
+            // Click on treat bag to create a treat
+            treatBag.addEventListener('click', () => {
+                if (!treat.classList.contains('visible')) {
+                    const bagRect = treatBag.getBoundingClientRect();
+                    treat.style.left = `${bagRect.left + bagRect.width/2}px`;
+                    treat.style.top = `${bagRect.top + bagRect.height/2}px`;
+                    treat.classList.add('visible');
+                    xOffset = 0;
+                    yOffset = 0;
+                }
+            });
+
+            treat.addEventListener('mousedown', dragStart);
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', dragEnd);
+
+            function dragStart(e) {
+                if (!treat.classList.contains('visible')) return;
+                
+                initialX = e.clientX - xOffset;
+                initialY = e.clientY - yOffset;
+
+                if (e.target === treat || e.target.parentElement === treat) {
+                    isDragging = true;
+                    treat.classList.add('dragging');
+                }
+            }
+
+            function drag(e) {
+                if (isDragging) {
+                    e.preventDefault();
+                    currentX = e.clientX - initialX;
+                    currentY = e.clientY - initialY;
+                    xOffset = currentX;
+                    yOffset = currentY;
+
+                    setTranslate(currentX, currentY, treat);
+                }
+            }
+
+            function setTranslate(xPos, yPos, el) {
+                el.style.transform = `translate(${xPos}px, ${yPos}px)`;
+            }
+
+            function dragEnd(e) {
+                if (isDragging) {
+                    isDragging = false;
+                    treat.classList.remove('dragging');
+
+                    // Check if treat is near dog
+                    const treatRect = treat.getBoundingClientRect();
+                    const dogRect = dog.getBoundingClientRect();
+
+                    if (isNearDog(treatRect, dogRect)) {
+                        feedDog();
+                    }
+                }
+            }
+
+            function isNearDog(treatRect, dogRect) {
+                const treatCenter = {
+                    x: treatRect.left + treatRect.width / 2,
+                    y: treatRect.top + treatRect.height / 2
+                };
+
+                return (treatCenter.x >= dogRect.left &&
+                        treatCenter.x <= dogRect.right &&
+                        treatCenter.y >= dogRect.top &&
+                        treatCenter.y <= dogRect.bottom);
+            }
+
+            function feedDog() {
+                // Hide the treat
+                treat.classList.remove('visible');
+                dog.classList.add('eating');
+
+                // After eating animation, trigger enlightenment
+                setTimeout(() => {
+                    dog.classList.add('enlightened');
+                    // Reset treat after animation
+                    setTimeout(() => {
+                        treat.style.transform = '';
+                        xOffset = 0;
+                        yOffset = 0;
+                        dog.classList.remove('eating');
+                        // Reset enlightened state after 5 seconds
+                        setTimeout(() => {
+                            dog.classList.remove('enlightened');
+                        }, 5000);
+                    }, 500);
+                }, 500);
+            }
+        });
+    </script>
+</body>
+</html> 
